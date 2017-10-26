@@ -17,7 +17,6 @@
  *  0, 1,0.003, 30
  * ......
  *
- * EDIT 6/30/2017: capable of decoding all files in one folder 
  * 
  * Compilation instructions: 
  *      make (or gmake. uses makefile)
@@ -31,7 +30,7 @@
 #include <stdint.h> 
 #define BIT_MASK_8 255
 
- /* ---------- decoding ------------ */
+/* Character to byte representation */
 void chartoByte(char input, char *output)
 {
     for (int i = 7; i >= 0; --i)
@@ -41,6 +40,8 @@ void chartoByte(char input, char *output)
     }
     output[8] = '\0';
 }
+
+/* Character to float representation */
 float decodeFloat(char * input)
 {
     unsigned int f = 0;
@@ -53,6 +54,7 @@ float decodeFloat(char * input)
     return *((float *) &f);
 }
 
+/* Character to int16_t representation */
 int16_t decodeIntsixteen(char * input)
 {
     unsigned int f = 0;
@@ -65,7 +67,7 @@ int16_t decodeIntsixteen(char * input)
     return *((int16_t *) &f);
 }
 
-// A simple atoi() function from GeeksforGeeks
+/* A simple atoi() function from GeeksforGeeks */
 int myAtoi(char *str)
 {
     int res = 0; // Initialize result
@@ -79,12 +81,15 @@ int myAtoi(char *str)
     return res;
 }
 
-//takes in 3 arguments: 1) date 2) subject number 3) number of trials 
-
+/* Main function 
+* takes in 3 arguments: 1) date 2) subject number 3) number of trials 
+* Function reads data encrypted as characters 
+* and decodes it using functions above. Results are written to a new file. 
+* Function decodes one subject at a time. 
+*/
 int main(int argc, char *argv[])
 {   
     int trials = myAtoi(argv[3]);
-	printf("\n%d\n", trials);
 	for( int i = 1; i <= trials; i++)
 	{
 		char input[50];
@@ -102,10 +107,8 @@ int main(int argc, char *argv[])
         float time = 0;
         int16_t encoder_counts = 0;
         char buff[7];
-        //unsigned char c; // Temp holder for each character in the file
 
-        //fgetc(logFile); // Ignore the first character
-
+        //writing decoded data into file
         while (!feof(logFile)) 
         {
             for (int i = 0; i < 7; i++) 
