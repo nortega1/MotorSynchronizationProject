@@ -83,12 +83,12 @@ int myAtoi(char *str)
 
 int main(int argc, char *argv[])
 {   
-    int trials = myAtoi(argv[3]);
-	printf("\n%d\n", trials);
+    int trial = myAtoi(argv[3]);
+	printf("\n%d\n", trial);
 	char input[50];
 	char output[50];
-	sprintf(input, "%s/%s_Subject_%s.%d_data.txt", argv[1], argv[1], argv[2], argv[3]);
-	sprintf(output, "%s/%s_Subject_%s.%d_Res.txt", argv[1], argv[1], argv[2], argv[3]);
+	sprintf(input, "%s/%s_Subject_%s.%d_data.txt", argv[1], argv[1], argv[2], trial);
+	sprintf(output, "%s/%s_Subject_%s.%d_Res.txt", argv[1], argv[1], argv[2], trial);
 	printf("%s", input);
 	printf("%s\n", output);
 
