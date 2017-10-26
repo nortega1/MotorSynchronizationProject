@@ -17,14 +17,13 @@
  *  0, 1,0.003, 30
  * ......
  *
- * EDIT 6/30/2017: capable of decoding all files in one folder 
  * 
  * Compilation instructions: 
  *      make (or gmake. uses makefile)
  *      make clean (cleans executible)
  * Run executible: 
- *      ./LogDecoder2 date subject_num num_trials
- * OR 	LogDecoder2.exe date subject_num num_trials
+ *      ./LogDecoder2 date subject_num trial
+ * OR 	LogDecoder2.exe date subject_num trial
  */
 #include <stdio.h>
 #include <stdlib.h>
