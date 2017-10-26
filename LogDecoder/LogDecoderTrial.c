@@ -67,7 +67,7 @@ int16_t decodeIntsixteen(char * input)
     return *((int16_t *) &f);
 }
 
-/* A simple atoi() function from GeeksforGeeks */
+/* A simple character to string function from GeeksforGeeks */
 int myAtoi(char *str)
 {
     int res = 0; // Initialize result
@@ -105,9 +105,16 @@ int main(int argc, char *argv[])
     float time = 0;
     int16_t encoder_counts = 0;
     char buff[7];
+    int skip = myAtoi(argv[4]);
     //unsigned char c; // Temp holder for each character in the file
 
     //fgetc(logFile); // Ignore the first character
+    
+    //ignore 'skip' number of characters 
+    for (int i = 0; i < skip; i++) 
+    {
+        fgetc(logFile); 
+    }
 
     while (!feof(logFile)) 
     {
