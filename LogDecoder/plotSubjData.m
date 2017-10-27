@@ -1,6 +1,7 @@
-% Plots Data from subject. Checks corruptions resolved
+% Plots data from subject. Can help visually inspect if corruptions have been
+% resolved 
 date = '9.1.2017';
-subject_num = '6';
+subject_num = '1';
 num_trials = '33';
 
 corr_files = csvread(strcat('/',date, '/', date,'_Subject_',subject_num,'_Corr.txt'));
@@ -10,6 +11,8 @@ for curr_trial = 1:str2double(num_trials)
     if find(curr_trial == corr_files)
         log_file = fixTrial(log_file);
     end
-    figure();
-    plot(log_file(1:end-2,3),log_file(1:end-2,4));
+    
+    % plot data 
+    figure(); plot(log_file(600:end-2,3),log_file(600:end-2,4));
+    xlabel('Time'); ylabel('Encoder Counts');
 end
