@@ -2,9 +2,9 @@
 
 %% Subject information 
 % Edit as needed 
-date = '7.12.2017';
-subject_num = '1';
-num_trials = '18';
+date = '9.1.2017';
+subject_num = '3';
+num_trials = '33';
 
 %% Decode all subject files
 % Edit number of trials of subject
@@ -19,16 +19,21 @@ curr_trial = 1; %current trial
 fix = 1;
 path_trial_decode = '"/Users/Nicole/Documents/JHU/LIMBS/MotorSynchronizationProject/LogDecoder/LogDecoderTrial_MAC"';
 format_spec = '%s %s %s %s %s';
+corr_files = NaN(str2num(num_trials),1);
 
 while(curr_trial <= str2double(num_trials))
     log_file = csvread(strcat('/',date, '/', date,'_Subject_',subject_num,'.',num2str(curr_trial),'_Res.txt'));
     log_file = log_file(1:end-2,:); %cutting out extra data points at the end of file
     
     %check for corruption
+    l_file = fixTrial(log_file);
     time = log_file(600:end-2,3);
     d_time = diff(time);
     disorder = d_time(d_time < 0); %check if time chronological
-    if ~isempty(disorder)
+    fixTrial(log_file);
+    if length(disorder) > 400 
+        %record corruption
+        corr_files(curr_trial) = curr_trial;
         input = sprintf(format_spec, path_trial_decode, date, subject_num, num2str(curr_trial), num2str(fix));
         system(input);
         fix = fix + 1;
@@ -36,6 +41,7 @@ while(curr_trial <= str2double(num_trials))
             fix = 1;
             curr_trial = curr_trial + 1;
         end
+        display(curr_trial);
     else
         curr_trial = curr_trial + 1;
         fix = 1;
@@ -43,6 +49,12 @@ while(curr_trial <= str2double(num_trials))
     
         
 end
+
+%record corrupted files
+fileID = fopen(fullfile(date, strcat(date,'_Subject_',subject_num,'_Corr.txt')), 'w');
+corr_files(isnan(corr_files)) = [];
+fprintf(fileID,'%d ',corr_files);
+fclose(fileID);
 
 
 
