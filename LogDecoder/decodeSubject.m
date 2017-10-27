@@ -3,7 +3,7 @@
 %% Subject information 
 % Edit as needed 
 date = '9.1.2017';
-subject_num = '3';
+subject_num = '6';
 num_trials = '33';
 
 %% Decode all subject files
@@ -31,7 +31,7 @@ while(curr_trial <= str2double(num_trials))
     d_time = diff(time);
     disorder = d_time(d_time < 0); %check if time chronological
     fixTrial(log_file);
-    if length(disorder) > 400 
+    if length(disorder) > 400 || ~isempty(find(isnan(time)))
         %record corruption
         corr_files(curr_trial) = curr_trial;
         input = sprintf(format_spec, path_trial_decode, date, subject_num, num2str(curr_trial), num2str(fix));
