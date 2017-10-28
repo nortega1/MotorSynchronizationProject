@@ -1,4 +1,4 @@
-function [ freq_trials ] = readBinDevFreq( subj_num, date, num_trials)
+function [ freq_trials ] = readBinDevFreq( subj_num, date, num_trials, dev_harmonics)
 %READDEVFREQ reads the input txt file of a subject's deviation
 %frequencies (represented as binary numbers).
 %Outputs a structure with all the conditions (frequencies
@@ -17,7 +17,6 @@ bin_freq_s = bin_freq_s';
 
 fundamental_period = 80;   %events per cycle, AKA perturbations per period
 fundamental_freq = 1/fundamental_period;    %cycles per event
-dev_harmonics = [3 5 7 11 17 23 31]; % 23 29 ** 37 max for period = 80
 dev_freq_dec = fundamental_freq * dev_harmonics;
 freq_trials = zeros(num_trials, length(dev_harmonics)+1);
 trial = 1;

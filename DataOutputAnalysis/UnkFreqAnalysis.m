@@ -43,14 +43,20 @@ fundamental_freq = 1/fundamental_period;    %cycles per event
 repeats = 2;                        %number of times a complete trial will repeat
 thresh_val = -105;                  % Estimating threshold value
 
-% these prime multiples are approx log spaced. dropping 2 to keep it to 7 
-dev_harmonics = [3 5 7 11 17 23 31]; % 23 29 ** 37 max for period = 80
-% phase shifts were randomly chosen using rand(7,1)
-dev_phase_shift = [0.5291 0.0409 0.2208 0.8799 0.0536 0.7651 0.1022];
+% % these prime multiples are approx log spaced. dropping 2 to keep it to 7 
+% dev_harmonics = [3 5 7 11 17 20 23]; % 23 29 ** 37 max for period = 80
+% % phase shifts were randomly chosen using rand(7,1)
+% dev_phase_shift = [1.387 0.257 3.324 2.512 1.633 1.141 2.710];
+% dev_amplitude = [0.029 0.036 0.043 0.036 0.045 0.055 0.055];
+devfreq_info = csvread(strcat('/',date, '/', date,'_DevFreq_Info.txt'));
+dev_harmonics = devfreq_info(1,:);
+dev_phase_shift = devfreq_info(2,:);
+dev_amplitude = devfreq_info(3,:);
 
 % Tested frequencies
 conditions = dev_harmonics * fundamental_freq;
-condition_set = [conditions(1:3); conditions(4:5) 0; conditions(6) 0 0];
+condition_set = [conditions(1:3); conditions(4) 0 0; ...
+    conditions(5) 0 0; conditions(6) 0 0; conditions(7) 0 0];
 
 signal_len = 260;
 
@@ -81,7 +87,7 @@ for curr_subj = start_subj:num_subj
     unfixed_trials = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Skip.txt'));
 
     % Frequencies tested for subject in the order they appear
-    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials);
+    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
     
     avg_met_dev = nan(num_trials, 1);
     rhythm_reps = zeros(length(condition_set), num_trials, 2);
@@ -104,7 +110,7 @@ for curr_subj = start_subj:num_subj
         log_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
         input_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
         % skip unsuccessful trials
-        if find(curr_trial == nonzeros(fixed_trials(curr_subj,:)))
+        if find(curr_trial == fixed_trials)
             log_file = fixTrial(log_file);
         end
         log_file = log_file(1:end-2,:); %cutting out extra data points at the end of file
