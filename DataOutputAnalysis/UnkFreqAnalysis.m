@@ -31,7 +31,7 @@ close all;
 % Edit as needed depending on experiment 
 start_subj = 1;
 num_subj = 16;                      % total number of subjects
-date = '9.1.2017';                  % date for experiment (type of experiment)
+date = '9.1.2017';                  % date for experiment (type of5experiment)
 rest =  5;                          % in seconds
 
 %% ------ Constants ------ %%
@@ -320,7 +320,7 @@ for rhCond = 1:2
     h1(rhCond) = fill([x;flipud(x)],[y-dy;flipud(y+dy)],colors(rhCond),'linestyle','none');
     line(x,y,'Color',colors(rhCond))
     set(h1(rhCond),  'facealpha',0.3)
-    %lgd1(1) = semilogx(conditions(1:6), rhythm_data(rhCond).mag_bode_avg);
+    %lgd1(1) = semilogx(conditions, rhythm_data(rhCond).mag_bode_avg);
     
     hold on;
     subplot(2,1,2);
@@ -331,7 +331,7 @@ for rhCond = 1:2
     h2(rhCond) = fill([x;flipud(x)],[y-dy;flipud(y+dy)],colors(rhCond),'linestyle','none');
     line(x,y, 'Color',colors(rhCond))
     set(h2(rhCond),  'facealpha',0.3)
-%     lgd2(1) = semilogx(conditions(1:6), rhythm_data(rhCond).angle_bode_avg);
+    %lgd2(1) = semilogx(conditions, rhythm_data(rhCond).angle_bode_avg);
 end
 hold on;
 subplot(2,1,1);
