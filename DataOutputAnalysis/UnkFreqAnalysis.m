@@ -30,7 +30,7 @@ close all;
 %% ------ Variables ------ %%
 % Edit as needed depending on experiment 
 start_subj = 1;
-num_subj = 2;                      % total number of subjects
+num_subj = 16;                      % total number of subjects
 date = '9.1.2017';                  % date for experiment (type of experiment)
 rest =  5;                          % in seconds
 
@@ -78,6 +78,10 @@ rhythm_data = struct;
 % determine the buzzer/tapping deviation from steady metronome
 
 for curr_subj = start_subj:num_subj
+    
+    if curr_subj == 7
+        continue;
+    end
     
     % Rhythms tested for subject in the order they appear
     % Total number of trials for subject 
@@ -248,6 +252,9 @@ close all;
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
         for curr_subj = start_subj:size(subject_data, 2)
+            if curr_subj == 7
+                continue;
+            end
             mag_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz;
             mag_tap_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_tap;
             angle_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).angle_buzz;
@@ -332,7 +339,7 @@ set(gca,'xscale','log')
 title('Magnitude Plot');
 xlabel('Frequency (cycles/event)');
 ylabel('Magnitude (dB)');
-axis([.05 .2875 -50 10]);
+axis([.05 .3 -60 20]);
 
 hold on;
 subplot(2,1,2);
@@ -340,7 +347,7 @@ set(gca,'xscale','log')
 title('Phase Plot');
 xlabel('Frequency (cycles/event)');
 ylabel('Phase (degrees)');
-axis([.05 .2875 -100 10]);
+axis([.05 .3 -200 50]);
 
 legend(h1, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
 legend(h2, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
