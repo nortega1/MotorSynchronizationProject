@@ -244,13 +244,10 @@ for curr_subj = start_subj:size(subject_data, 2)
 end
 close all;
 %%
-% Rearrange data by storing by rhythm/no_rhythm  
+% Rearrange data
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
         for curr_subj = start_subj:size(subject_data, 2)
-            if curr_subj == 6 || curr_subj == 5 || curr_subj == 7 || curr_subj ==4  
-                continue;
-            end
             mag_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz;
             mag_tap_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_tap;
             angle_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).angle_buzz;
@@ -266,7 +263,7 @@ for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
 end
 %%
 % Calculate bode plot values for each subject 
-freq_indx = [4 6 8 12 18 24];
+freq_indx = [4 6 8 12 18 21 24];
 cond  = 1;
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     cond  = 1;
@@ -309,7 +306,7 @@ colors = ['r', 'b'];
 for rhCond = 1:2
     hold on; 
     subplot(2,1,1);
-    x = conditions(1:6)';
+    x = conditions';
     y = rhythm_data(rhCond).mag_bode_avg';
     dy = rhythm_data(rhCond).std_mag_bode_avg';
     %errorbar(x,y,err)
@@ -320,7 +317,7 @@ for rhCond = 1:2
     
     hold on;
     subplot(2,1,2);
-    x = conditions(1:6)';
+    x = conditions';
     y = rhythm_data(rhCond).angle_bode_avg';
     dy = rhythm_data(rhCond).std_angle_bode_avg';
     %errorbar(x,y,err)
