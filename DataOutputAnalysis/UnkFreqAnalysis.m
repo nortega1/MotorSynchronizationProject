@@ -30,7 +30,7 @@ close all;
 %% ------ Variables ------ %%
 % Edit as needed depending on experiment 
 start_subj = 1;
-num_subj = 1;                      % total number of subjects
+num_subj = 2;                      % total number of subjects
 date = '9.1.2017';                  % date for experiment (type of experiment)
 rest =  5;                          % in seconds
 
@@ -48,6 +48,7 @@ thresh_val = -105;                  % Estimating threshold value
 % % phase shifts were randomly chosen using rand(7,1)
 % dev_phase_shift = [1.387 0.257 3.324 2.512 1.633 1.141 2.710];
 % dev_amplitude = [0.029 0.036 0.043 0.036 0.045 0.055 0.055];
+
 devfreq_info = csvread(strcat('/',date, '/', date,'_DevFreq_Info.txt'));
 dev_harmonics = devfreq_info(1,:);
 dev_phase_shift = devfreq_info(2,:);
@@ -102,10 +103,11 @@ for curr_subj = start_subj:num_subj
         
         % extract deviation freq being tested during trial
         freq_devs_by_trial = nonzeros(freq_devs_by_subject(curr_trial,:));
-        % determine condition being tested
-        n_cond = 4 - length(freq_devs_by_trial);
+        % determine condition being tested by comparing trial condition to
+        % condition set
+        [r,c] = find(freq_devs_by_trial(1) == condition_set);
+        n_cond = r;
        
-        
         % read input and output file
         log_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
         input_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
@@ -126,6 +128,10 @@ for curr_subj = start_subj:num_subj
         rhythm_cond = rhythm_file(curr_trial) + 1;
         rhythm_reps(n_cond, curr_trial, rhythm_cond) = 1;
         rep = sum(rhythm_reps(n_cond, :, rhythm_cond));
+        
+        if rhythm_cond == 3
+            n_cond = 1;
+        end
             
         subject_data(curr_subj).rhythm_condition(rhythm_cond).trials_by_condition(n_cond).n_met(:,rep) = n_met_all;
         subject_data(curr_subj).rhythm_condition(rhythm_cond).trials_by_condition(n_cond).n_buzz(:,rep) = n_buzz_all;
@@ -143,7 +149,7 @@ for curr_subj = start_subj:size(subject_data, 2)
     rhythm_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);
     % Frequencies tested per subject in the order they appear
-    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials);
+    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
     
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         
