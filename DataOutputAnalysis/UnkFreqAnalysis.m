@@ -79,7 +79,7 @@ rhythm_data = struct;
 
 for curr_subj = start_subj:num_subj
     
-    if curr_subj == 7
+    if  curr_subj == 7 
         continue;
     end
     
@@ -252,7 +252,7 @@ close all;
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
         for curr_subj = start_subj:size(subject_data, 2)
-            if curr_subj == 7
+            if curr_subj == 7 
                 continue;
             end
             mag_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz;
