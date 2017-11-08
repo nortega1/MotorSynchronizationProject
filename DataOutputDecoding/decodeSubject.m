@@ -4,7 +4,7 @@
 %% Subject information 
 % Edit as needed 
 date = '9.1.2017';
-subject_num = '1';
+subject_num = '11';
 num_trials = '33';
 
 %% Decode All Subject Files

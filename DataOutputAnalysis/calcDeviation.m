@@ -1,4 +1,4 @@
-function [ buzz_dev, tap_dev, percentage_taps ] = CalcDeviation( nz_met_times, nz_buzz_times, nz_tap_times, avg_met_dev )
+function [ buzz_dev, tap_dev, percentage_taps ] = calcDeviation( nz_met_times, nz_buzz_times, nz_tap_times, avg_met_dev )
 %CALCDEVIATION Calculate the deviation of buzzer and tapping from a steady
 %metronome 
 %Nicole Ortega @ 7/24/2017
