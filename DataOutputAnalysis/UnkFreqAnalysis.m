@@ -30,7 +30,7 @@ close all;
 %% ------ Variables ------ %%
 % Edit as needed depending on experiment 
 start_subj = 1;
-num_subj = 16;                      % total number of subjects
+num_subj = 1;                      % total number of subjects
 date = '9.1.2017';                  % date for experiment (type of5experiment)
 rest =  5;                          % in seconds
 
@@ -49,7 +49,7 @@ thresh_val = -105;                  % Estimating threshold value
 % dev_phase_shift = [1.387 0.257 3.324 2.512 1.633 1.141 2.710];
 % dev_amplitude = [0.029 0.036 0.043 0.036 0.045 0.055 0.055];
 
-devfreq_info = csvread(strcat('/',date, '/', date,'_DevFreq_Info.txt'));
+devfreq_info = dlmread(strcat(date, '/', date,'_DevFreq_Info.txt'));
 dev_harmonics = devfreq_info(1,:);
 dev_phase_shift = devfreq_info(2,:);
 dev_amplitude = devfreq_info(3,:);
@@ -86,10 +86,10 @@ for curr_subj = start_subj:num_subj
     % Rhythms tested for subject in the order they appear
     % Total number of trials for subject 
     % Files with fixed and unfixed corruptions
-    rhythm_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
+    rhythm_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);   %total number of trials
-    fixed_trials = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Corr.txt'));
-    unfixed_trials = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Skip.txt'));
+    fixed_trials = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Corr.txt'));
+    unfixed_trials = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Skip.txt'));
 
     % Frequencies tested for subject in the order they appear
     freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
@@ -113,8 +113,8 @@ for curr_subj = start_subj:num_subj
         n_cond = r;
        
         % read input and output file
-        log_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
-        input_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
+        log_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
+        input_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
         % skip unsuccessful trials
         if find(curr_trial == fixed_trials)
             log_file = fixTrial(log_file);
@@ -150,7 +150,7 @@ close all;
 %% 
 
 for curr_subj = start_subj:size(subject_data, 2)
-    rhythm_file = csvread(strcat('/',date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
+    rhythm_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);
     % Frequencies tested per subject in the order they appear
     freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
@@ -310,26 +310,28 @@ end
 % Calculate bode plot values for each condition using avg of subjects
 figure;
 colors = ['r', 'b'];
+x = struct;
+y = struct;
 for rhCond = 1:2
     hold on; 
     subplot(2,1,1);
-    x = conditions';
-    y = rhythm_data(rhCond).mag_bode_avg';
+    x.mag.rhy(:,rhCond) = conditions';
+    y.mag.rhy(:,rhCond) = rhythm_data(rhCond).mag_bode_avg';
     dy = rhythm_data(rhCond).std_mag_bode_avg';
     %errorbar(x,y,err)
-    h1(rhCond) = fill([x;flipud(x)],[y-dy;flipud(y+dy)],colors(rhCond),'linestyle','none');
-    line(x,y,'Color',colors(rhCond))
+    h1(rhCond) = fill([x.mag.rhy(:,rhCond);flipud(x.mag.rhy(:,rhCond))],[y.mag.rhy(:,rhCond)-dy;flipud(y.mag.rhy(:,rhCond)+dy)],colors(rhCond),'linestyle','none');
+    line(x.mag.rhy(:,rhCond),y.mag.rhy(:,rhCond),'Color',colors(rhCond))
     set(h1(rhCond),  'facealpha',0.3)
     %lgd1(1) = semilogx(conditions, rhythm_data(rhCond).mag_bode_avg);
     
     hold on;
     subplot(2,1,2);
-    x = conditions';
-    y = rhythm_data(rhCond).angle_bode_avg';
+    x.phase.rhy(:,rhCond) = conditions';
+    y.phase.rhy(:,rhCond) = rhythm_data(rhCond).angle_bode_avg';
     dy = rhythm_data(rhCond).std_angle_bode_avg';
     %errorbar(x,y,err)
-    h2(rhCond) = fill([x;flipud(x)],[y-dy;flipud(y+dy)],colors(rhCond),'linestyle','none');
-    line(x,y, 'Color',colors(rhCond))
+    h2(rhCond) = fill([x.phase.rhy(:,rhCond);flipud(x.phase.rhy(:,rhCond))],[y.phase.rhy(:,rhCond)-dy;flipud(y.phase.rhy(:,rhCond)+dy)],colors(rhCond),'linestyle','none');
+    line(x.phase.rhy(:,rhCond), y.phase.rhy(:,rhCond), 'Color',colors(rhCond))
     set(h2(rhCond),  'facealpha',0.3)
     %lgd2(1) = semilogx(conditions, rhythm_data(rhCond).angle_bode_avg);
 end
@@ -351,4 +353,33 @@ axis([.05 .3 -200 50]);
 
 legend(h1, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
 legend(h2, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
+
+%% for single subjects
+% no error included, no .25 magnitude
+figure;
+x.mag.rhy(6,:) = [];
+x.phase.rhy(6,:) = [];
+y.phase.rhy(6,:) = [];
+y.mag.rhy(6,:) = [];
+subplot(2,1,1);
+plot(x.mag.rhy, y.mag.rhy);
+title('Magnitude Plot');
+xlabel('Frequency (cycles/event)');
+ylabel('Magnitude (dB)');
+set(gca,'xscale','log')
+axis([.05 .3 -60 20]);
+legend('No Rhythm', 'Rhythm', 'Location', 'southwest');
+
+subplot(2,1,2);
+plot(x.phase.rhy, y.phase.rhy);
+title('Phase Plot');
+xlabel('Frequency (cycles/event)');
+ylabel('Phase (degrees)');
+set(gca,'xscale','log')
+axis([.05 .3 -200 50]);
+legend('No Rhythm', 'Rhythm', 'Location', 'southwest');
+
+
+
+
 

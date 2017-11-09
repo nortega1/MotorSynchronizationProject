@@ -10,8 +10,8 @@ function [ freq_trials ] = readBinDevFreq( subj_num, date, num_trials, dev_harmo
 %representation) tested in the order they appeared to the participant.
 %OUTPUT: dev frequencies tested (numerical representation)
 
-file = strcat(strcat('/',date, '/', date,'_Subject_',num2str(subj_num),'_BinDevFreqs.txt'));
-bin_freq_n = csvread(file);
+file = strcat(strcat(date, '/', date,'_Subject_',num2str(subj_num),'_BinDevFreqs.txt'));
+bin_freq_n = dlmread(file);
 bin_freq_s = num2str(bin_freq_n,'%08i');
 bin_freq_s = bin_freq_s';
 
