@@ -43,6 +43,7 @@ A3 = A3(1:L/2+1);
 
 figure;
 plot(f, A1,'-*b');
+hold on;
 plot(f, A3,'-.r');
 
 end
