@@ -1,4 +1,4 @@
-function [ freq_trials ] = readBinDevFreq( subj_num, E, date, trials_per_subj, dev_harmonics)
+function [ freq_trials ] = readBinDevFreq( subj_num, E)
 %READDEVFREQ reads the input txt file of a subject's deviation
 %frequencies (represented as binary numbers).
 %Outputs a structure with all the conditions (frequencies
