@@ -1,8 +1,10 @@
-function [ nz_met_times, nz_buzz_times, nz_tap_times] = ExtractLogData_rev0( met_period, logFile, dev_freq, thresh )
+function [ nz_met_times, nz_buzz_times, nz_tap_times] = ExtractLogData_rev0( E, logFile, dev_freq, plot_on)
 %STORELOGDATA store raw data from logFile. Plot encoder counts vs. time
 %Nicole Ortega @ 7/24/2017
 
     %% ---- Extract Data ---- %%
+    met_period = E.met_period;
+    thresh = E.thresh_val;
     
     buzz = logFile(1:end-2,1);                            % store
     time = logFile(1:end-2,3);
@@ -10,16 +12,17 @@ function [ nz_met_times, nz_buzz_times, nz_tap_times] = ExtractLogData_rev0( met
 
     %% --- Plotting Encoder Readings --- %%
     % Plot time on the x-axis and encoder on the y-axis 
-    
-    figure();
-    plot(time(5:end), encoder(5:end));
-    str= sprintf('Encoder Counts vs. Time for a deviation of %.2f %.2f %.2f Hz', dev_freq);
-    title(str);
-    xlabel('Time (s)') % x-axis label 
-    ylabel('Encoder Counts') % y-axis label
-    hold on;
-    hline = refline([0 thresh]);
-    hline.Color = 'r';
+    if plot_on
+        figure();
+        plot(time(5:end), encoder(5:end));
+        str= sprintf('Encoder Counts vs. Time for a deviation of %.2f %.2f %.2f Hz', dev_freq);
+        title(str);
+        xlabel('Time (s)') % x-axis label 
+        ylabel('Encoder Counts') % y-axis label
+        hold on;
+        hline = refline([0 thresh]);
+        hline.Color = 'r';
+    end
     
     %% --- Experimental Buzzer --- % 
     % During the experiment, the buzzer first follows a steady metronome,

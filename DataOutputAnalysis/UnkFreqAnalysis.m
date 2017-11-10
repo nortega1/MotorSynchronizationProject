@@ -29,45 +29,43 @@ close all;
 
 %% ------ Variables ------ %%
 % Edit as needed depending on experiment 
-start_subj = 1;
-num_subj = 1;                      % total number of subjects
-date = '9.1.2017';                  % date for experiment (type of5experiment)
-rest =  5;                          % in seconds
+% Variable E holds experimental variables/constants
+E = struct;                         
+E.start_subj = 1;
+E.total_subj = 1;                   % total number of subjects
+E.date = '9.1.2017';                % E.date for experiment (type of5experiment)
+E.trials_per_subj = 33;
 
 %% ------ Constants ------ %%
-sample_freq  = 1000;                % 1k Hz
-met_period = .333;
-met_freq = 1/met_period;            % freq of steady metronome in Hz
-fundamental_period = 80;            % events per cycle, AKA perturbations per period
-fundamental_freq = 1/fundamental_period;    %cycles per event
-repeats = 2;                        %number of times a complete trial will repeat
-thresh_val = -105;                  % Estimating threshold value
+E.sample_freq  = 1000;                % 1k Hz
+E.met_period = .333;
+E.met_freq = 1/E.met_period;            % freq of steady metronome in Hz
+E.fundamental_period = 80;            % events per cycle, AKA perturbations per period
+E.fundamental_freq = 1/E.fundamental_period;    %cycles per event
+E.repeat = 2;                        %number of times a complete trial will repeat
+E.thresh_val = -105;                  % Estimating threshold value
+E.rest =  5;                          % time in seconds before start of trial
 
-% % these prime multiples are approx log spaced. dropping 2 to keep it to 7 
-% dev_harmonics = [3 5 7 11 17 20 23]; % 23 29 ** 37 max for period = 80
-% % phase shifts were randomly chosen using rand(7,1)
-% dev_phase_shift = [1.387 0.257 3.324 2.512 1.633 1.141 2.710];
-% dev_amplitude = [0.029 0.036 0.043 0.036 0.045 0.055 0.055];
 
-devfreq_info = dlmread(strcat(date, '/', date,'_DevFreq_Info.txt'));
-dev_harmonics = devfreq_info(1,:);
-dev_phase_shift = devfreq_info(2,:);
-dev_amplitude = devfreq_info(3,:);
+devfreq_info = dlmread(strcat(E.date, '/', E.date,'_DevFreq_Info.txt'));
+E.dev_harmonics = devfreq_info(1,:);
+E.dev_phase_shift = devfreq_info(2,:);
+E.dev_amplitude = devfreq_info(3,:);
 
 % Tested frequencies
-conditions = dev_harmonics * fundamental_freq;
-condition_set = [conditions(1:3); conditions(4) 0 0; ...
-    conditions(5) 0 0; conditions(6) 0 0; conditions(7) 0 0];
+E.conditions = E.dev_harmonics * E.fundamental_freq;
+E.condition_set = [E.conditions(1:3); E.conditions(4) 0 0; ...
+    E.conditions(5) 0 0; E.conditions(6) 0 0; E.conditions(7) 0 0];
 
-signal_len = 260;
+E.signal_len = 260;     %length of trial
 
 %% ------ Initializing Variables ------ %%
-reps = zeros(size(condition_set,1), 1);
-reps_old = zeros(size(condition_set,1), 1);
-reps_r = zeros(size(condition_set,1), 1);
-reps_nr = zeros(size(condition_set,1), 1);
-perc_tapsvsbuzz = nan(size(condition_set,1), num_subj);
-perc_tapsthrown = nan(size(condition_set,1), num_subj);
+reps = zeros(size(E.condition_set,1), 1);
+reps_old = zeros(size(E.condition_set,1), 1);
+reps_r = zeros(size(E.condition_set,1), 1);
+reps_nr = zeros(size(E.condition_set,1), 1);
+perc_tapsvsbuzz = nan(size(E.condition_set,1), E.total_subj);
+perc_tapsthrown = nan(size(E.condition_set,1), E.total_subj);
 
 subject_data = struct;
 rhythm_data = struct;
@@ -77,44 +75,46 @@ rhythm_data = struct;
 % average deviation from steady metronome. Data will later be used to
 % determine the buzzer/tapping deviation from steady metronome
 
-for curr_subj = start_subj:num_subj
+for curr_subj = E.start_subj:E.total_subj
     
     if  curr_subj == 7 
         continue;
     end
+    curr = struct;
     
     % Rhythms tested for subject in the order they appear
     % Total number of trials for subject 
     % Files with fixed and unfixed corruptions
-    rhythm_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
-    num_trials = length(rhythm_file);   %total number of trials
-    fixed_trials = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Corr.txt'));
-    unfixed_trials = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Skip.txt'));
+    rhythm_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
+    fixed_trials = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Corr.txt'));
+    unfixed_trials = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Skip.txt'));
 
     % Frequencies tested for subject in the order they appear
-    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
+    freq_devs_by_subject = readBinDevFreq(curr_subj, E);
     
-    avg_met_dev = nan(num_trials, 1);
-    rhythm_reps = zeros(length(condition_set), num_trials, 2);
-   
-    for curr_trial = 1:num_trials
+    avg_met_dev = nan(E.trials_per_subj, 1);
+    rhythm_reps = zeros(length(E.condition_set), E.trials_per_subj, 2);
+    
+    plot_on = 0;    %produce plots from this section
+    for curr_trial = 1:E.trials_per_subj
         if find(curr_trial == unfixed_trials)
             continue;
         end
         % initialize variables
-        n_met_all = nan(signal_len,1); n_buzz_all = nan(signal_len,1); n_tap_all = nan(signal_len,1);
-        buzz_dev_all = nan(signal_len,1); tap_dev_all = nan(signal_len,1);
+        plot_on = 0;    %produce plots from this section
+        n_met_all = nan(E.signal_len,1); n_buzz_all = nan(E.signal_len,1); n_tap_all = nan(E.signal_len,1);
+        buzz_dev_all = nan(E.signal_len,1); tap_dev_all = nan(E.signal_len,1);
         
         % extract deviation freq being tested during trial
         freq_devs_by_trial = nonzeros(freq_devs_by_subject(curr_trial,:));
         % determine condition being tested by comparing trial condition to
         % condition set
-        [r,c] = find(freq_devs_by_trial(1) == condition_set);
+        [r,c] = find(freq_devs_by_trial(1) == E.condition_set);
         n_cond = r;
        
         % read input and output file
-        log_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
-        input_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
+        log_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_Res.txt'));
+        input_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'.',num2str(curr_trial),'_DecPerts.txt'));
         % skip unsuccessful trials
         if find(curr_trial == fixed_trials)
             log_file = fixTrial(log_file);
@@ -123,11 +123,11 @@ for curr_subj = start_subj:num_subj
         
         % Extract steady metronome times, buzzer times, and tapping times
         % Store in vectors of the same length
-        [ n_met, n_buzz, n_tap ] = extractLogData(met_period, log_file, freq_devs_by_trial, thresh_val);
+        [ n_met, n_buzz, n_tap ] = extractLogData(E, log_file, freq_devs_by_trial, plot_on);
         n_met_all(1:length(n_met)) = n_met;  n_buzz_all(1:length(n_buzz)) = n_buzz; n_tap_all(1:length(n_tap)) = n_tap;
         
         % Calculate the average delay during a steady metronome 
-        [ subject_data(curr_subj).avg_met_dev(curr_trial) ] = avgMetDev(met_period, n_buzz, n_tap);
+        [ subject_data(curr_subj).avg_met_dev(curr_trial) ] = avgMetDev(E, n_buzz, n_tap, plot_on);
 
         rhythm_cond = rhythm_file(curr_trial) + 1;
         rhythm_reps(n_cond, curr_trial, rhythm_cond) = 1;
@@ -149,11 +149,11 @@ end
 close all;
 %% 
 
-for curr_subj = start_subj:size(subject_data, 2)
-    rhythm_file = dlmread(strcat(date, '/', date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
+for curr_subj = E.start_subj:size(subject_data, 2)
+    rhythm_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);
     % Frequencies tested per subject in the order they appear
-    freq_devs_by_subject = readBinDevFreq(curr_subj, date, num_trials, dev_harmonics);
+    freq_devs_by_subject = readBinDevFreq(curr_subj, E.date, num_trials, dev_harmonics);
     
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         
@@ -199,7 +199,7 @@ end
 close all;
 %%
 % Calculate nanmean per subject 
-for curr_subj = start_subj:size(subject_data, 2)
+for curr_subj = E.start_subj:size(subject_data, 2)
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met_avg = nanmean(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met,2);
@@ -212,7 +212,7 @@ for curr_subj = start_subj:size(subject_data, 2)
 
 end
 
-for curr_subj = start_subj:size(subject_data, 2)
+for curr_subj = E.start_subj:size(subject_data, 2)
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met_avg = nanmean([subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met_avg(42:121) subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met_avg(122:201)],2);
@@ -225,7 +225,7 @@ for curr_subj = start_subj:size(subject_data, 2)
 end
 %%
 % Calculate FFT for individual subjects 
-for curr_subj = start_subj:size(subject_data, 2)
+for curr_subj = E.start_subj:size(subject_data, 2)
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
             buzz_dev = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).buzz_dev_avg;
@@ -251,7 +251,7 @@ close all;
 % Rearrange data
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
-        for curr_subj = start_subj:size(subject_data, 2)
+        for curr_subj = E.start_subj:size(subject_data, 2)
             if curr_subj == 7 
                 continue;
             end
