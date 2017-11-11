@@ -32,7 +32,7 @@ close all;
 % Variable E holds experimental variables/constants
 E = struct;                         
 E.start_subj = 1;
-E.total_subj = 1;                   % total number of subjects
+E.total_subj = 16;                   % total number of subjects
 E.date = '9.1.2017';                % E.date for experiment (type of5experiment)
 E.trials_per_subj = 33;
 
@@ -74,13 +74,12 @@ rhythm_data = struct;
 % Store raw data (metronome times, buzzer times, tapping times) and find
 % average deviation from steady metronome. Data will later be used to
 % determine the buzzer/tapping deviation from steady metronome
-plot_on = 0;    %produce plots from this section
+
+plot_on = 1;    %produce plots from this section
 
 for curr_subj = E.start_subj:E.total_subj
     
-    if  curr_subj == 7 
-        continue;
-    end
+
     curr = struct;
     
     % Rhythms tested for subject in the order they appear
@@ -101,7 +100,6 @@ for curr_subj = E.start_subj:E.total_subj
             continue;
         end
         % initialize variables
-        plot_on = 0;    %produce plots from this section
         n_met_all = nan(E.signal_len,1); n_buzz_all = nan(E.signal_len,1); n_tap_all = nan(E.signal_len,1);
         buzz_dev_all = nan(E.signal_len,1); tap_dev_all = nan(E.signal_len,1);
         
@@ -141,14 +139,9 @@ for curr_subj = E.start_subj:E.total_subj
         subject_data(curr_subj).rhythm_condition(rhythm_cond).trials_by_condition(n_cond).n_buzz(:,rep) = n_buzz_all;
         subject_data(curr_subj).rhythm_condition(rhythm_cond).trials_by_condition(n_cond).n_tap(:,rep) = n_tap_all;
         
-        if plot_on 
-            close all;
-        end
-        
     end
     
 end
-close all;
 %% 
 
 plot_on = 0;
@@ -230,7 +223,7 @@ for curr_subj = E.start_subj:size(subject_data, 2)
     end
 end
 %%
-plot_on = 1;
+plot_on = 0;
 % Calculate FFT for individual subjects 
 for curr_subj = E.start_subj:size(subject_data, 2)
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
@@ -260,9 +253,9 @@ end
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
         for curr_subj = E.start_subj:size(subject_data, 2)
-            if curr_subj == 7 
-                continue;
-            end
+%             if curr_subj == 7 
+%                 continue;
+%             end
             mag_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz;
             mag_tap_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_tap;
             angle_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).angle_buzz;
@@ -279,12 +272,16 @@ end
 %%
 % Calculate bode plot values for each subject 
 freq_indx = [4 6 8 12 18 21 24];
+freq_indx3 = 21;
 cond  = 1;
-for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
-    cond  = 1;
-    for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
+for rhCond = 1:size(rhythm_data, 2)
+    cond = 1;
+    for trCond = 1:size(rhythm_data(rhCond).condition, 2)
         for j = 1:length(nonzeros(E.condition_set(trCond,:)))
             indx = freq_indx(cond);
+            if rhCond == 3
+                indx = freq_indx3;
+            end
             mag_buzz_by_subj = rhythm_data(rhCond).condition(trCond).mag_buzz(indx,:);
             mag_tap_by_subj = rhythm_data(rhCond).condition(trCond).mag_tap(indx,:);
             angle_buzz_by_subj = rhythm_data(rhCond).condition(trCond).angle_buzz(indx,:);
@@ -296,21 +293,20 @@ for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
             rhythm_data(rhCond).freq_condition(cond).mag_bode_by_subj = mag_bode_by_subj;
             rhythm_data(rhCond).freq_condition(cond).angle_bode_by_subj = angle_bode_by_subj;
             cond = cond + 1;
+            if rhCond == 3
+                break;
+            end
         end
     end
 end
 %%
 % Take average mag/angle for condition
-for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
-    cond  = 1;
-    for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
-        for j = 1:length(nonzeros(E.condition_set(trCond,:)))
-            rhythm_data(rhCond).mag_bode_avg(cond) = nanmean(rhythm_data(rhCond).freq_condition(cond).mag_bode_by_subj);
-            rhythm_data(rhCond).angle_bode_avg(cond) = nanmean(rhythm_data(rhCond).freq_condition(cond).angle_bode_by_subj);
-            rhythm_data(rhCond).std_mag_bode_avg(cond) = nanstd(rhythm_data(rhCond).freq_condition(cond).mag_bode_by_subj);
-            rhythm_data(rhCond).std_angle_bode_avg(cond) = nanstd(rhythm_data(rhCond).freq_condition(cond).angle_bode_by_subj);
-            cond = cond + 1;
-        end
+for rhCond = 1:size(rhythm_data, 2)
+    for trCond = 1:size(rhythm_data(rhCond).freq_condition, 2) 
+        rhythm_data(rhCond).mag_bode_avg(trCond) = nanmean(rhythm_data(rhCond).freq_condition(trCond).mag_bode_by_subj);
+        rhythm_data(rhCond).angle_bode_avg(trCond) = nanmean(rhythm_data(rhCond).freq_condition(trCond).angle_bode_by_subj);
+        rhythm_data(rhCond).std_mag_bode_avg(trCond) = nanstd(rhythm_data(rhCond).freq_condition(trCond).mag_bode_by_subj);
+        rhythm_data(rhCond).std_angle_bode_avg(trCond) = nanstd(rhythm_data(rhCond).freq_condition(trCond).angle_bode_by_subj);
     end
 end
 
@@ -320,11 +316,13 @@ figure;
 colors = ['r', 'b'];
 x = struct;
 y = struct;
+err = struct;
 for rhCond = 1:2
     hold on; 
     subplot(2,1,1);
     x.mag.rhy(:,rhCond) = E.conditions';
     y.mag.rhy(:,rhCond) = rhythm_data(rhCond).mag_bode_avg';
+    err.mag.rhy(:,rhCond) = rhythm_data(rhCond).std_mag_bode_avg;
     dy = rhythm_data(rhCond).std_mag_bode_avg';
     %errorbar(x,y,err)
     h1(rhCond) = fill([x.mag.rhy(:,rhCond);flipud(x.mag.rhy(:,rhCond))],[y.mag.rhy(:,rhCond)-dy;flipud(y.mag.rhy(:,rhCond)+dy)],colors(rhCond),'linestyle','none');
@@ -336,6 +334,7 @@ for rhCond = 1:2
     subplot(2,1,2);
     x.phase.rhy(:,rhCond) = E.conditions';
     y.phase.rhy(:,rhCond) = rhythm_data(rhCond).angle_bode_avg';
+    err.phase.rhy(:,rhCond) = rhythm_data(rhCond).std_angle_bode_avg;
     dy = rhythm_data(rhCond).std_angle_bode_avg';
     %errorbar(x,y,err)
     h2(rhCond) = fill([x.phase.rhy(:,rhCond);flipud(x.phase.rhy(:,rhCond))],[y.phase.rhy(:,rhCond)-dy;flipud(y.phase.rhy(:,rhCond)+dy)],colors(rhCond),'linestyle','none');
@@ -345,6 +344,7 @@ for rhCond = 1:2
 end
 hold on;
 subplot(2,1,1);
+errorbar(E.conditions(6), rhythm_data(3).mag_bode_avg, rhythm_data(3).std_mag_bode_avg, '*');
 set(gca,'xscale','log')
 title('Magnitude Plot');
 xlabel('Frequency (cycles/event)');
@@ -353,6 +353,7 @@ axis([.05 .3 -60 20]);
 
 hold on;
 subplot(2,1,2);
+errorbar(E.conditions(6), rhythm_data(3).angle_bode_avg, rhythm_data(3).std_angle_bode_avg,'*');
 set(gca,'xscale','log')
 title('Phase Plot');
 xlabel('Frequency (cycles/event)');
@@ -369,8 +370,11 @@ x.mag.rhy(6,:) = [];
 x.phase.rhy(6,:) = [];
 y.phase.rhy(6,:) = [];
 y.mag.rhy(6,:) = [];
+err.phase.rhy(6,:) = [];
+err.mag.rhy(6,:) = [];
 subplot(2,1,1);
-plot(x.mag.rhy, y.mag.rhy);
+errorbar(x.mag.rhy, y.mag.rhy, err.mag.rhy, '*-');
+hold on;
 title('Magnitude Plot');
 xlabel('Frequency (cycles/event)');
 ylabel('Magnitude (dB)');
@@ -379,7 +383,8 @@ axis([.05 .3 -60 20]);
 legend('No Rhythm', 'Rhythm', 'Location', 'southwest');
 
 subplot(2,1,2);
-plot(x.phase.rhy, y.phase.rhy);
+errorbar(x.phase.rhy, y.phase.rhy, err.phase.rhy, '*-');
+hold on;
 title('Phase Plot');
 xlabel('Frequency (cycles/event)');
 ylabel('Phase (degrees)');
