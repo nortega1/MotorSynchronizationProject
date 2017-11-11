@@ -25,9 +25,16 @@ end
 
 if plot_on
     figure;
-    histogram(tap_dev);
-    figure;
+    subplot(1,2,1);
     plot(tap_dev);
+    title('Avg Steady Metronome Delay');
+    xlabel('Metronome Count');
+    ylabel('Delay (s)');
+    subplot(1,2,2);
+    histogram(tap_dev);
+    title('Histogram of Avg Steady Metronome Delay');
+    xlabel('Delay (s)');
+    ylabel('Frequency');
 
 end
 

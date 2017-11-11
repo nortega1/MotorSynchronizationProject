@@ -1,4 +1,4 @@
-function [ nz_met_times, nz_buzz_times, nz_tap_times] = ExtractLogData_rev0( E, logFile, dev_freq, plot_on)
+function [ nz_met_times, nz_buzz_times, nz_tap_times] = extractLogData( E, logFile, dev_freq, plot_on)
 %STORELOGDATA store raw data from logFile. Plot encoder counts vs. time
 %Nicole Ortega @ 7/24/2017
 

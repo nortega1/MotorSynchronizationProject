@@ -1,4 +1,4 @@
-%% ------ NOTES ------ %%
+% ------ NOTES ------ %%
 % Nicole Ortega @ 7/28/2017
 %
 % Revision of Tapping Data that allows for trials testing any combination of perturbation
@@ -23,11 +23,11 @@
 % NOTE: when Nans are still present in signal, the FFT does not work
 % Haptic environment: pushing down against button
 
-%% ------ Clear ------ %%
+% ------ Clear ------ %%
 clear all; 
 close all;
 
-%% ------ Variables ------ %%
+% ------ Variables ------ %%
 % Edit as needed depending on experiment 
 % Variable E holds experimental variables/constants
 E = struct;                         
@@ -36,7 +36,7 @@ E.total_subj = 16;                   % total number of subjects
 E.date = '9.1.2017';                % E.date for experiment (type of5experiment)
 E.trials_per_subj = 33;
 
-%% ------ Constants ------ %%
+% ------ Constants ------ %%
 E.sample_freq  = 1000;                % 1k Hz
 E.met_period = .333;
 E.met_freq = 1/E.met_period;            % freq of steady metronome in Hz
@@ -59,7 +59,7 @@ E.condition_set = [E.conditions(1:3); E.conditions(4) 0 0; ...
 
 E.signal_len = 260;     %length of trial
 
-%% ------ Initializing Variables ------ %%
+% ------ Initializing Variables ------ %%
 reps = zeros(size(E.condition_set,1), 1);
 reps_old = zeros(size(E.condition_set,1), 1);
 reps_r = zeros(size(E.condition_set,1), 1);
@@ -70,18 +70,15 @@ perc_tapsthrown = nan(size(E.condition_set,1), E.total_subj);
 subject_data = struct;
 rhythm_data = struct;
 
-%% ---- Open Files and Store Data ---- % 
+% ---- Open Files and Store Data ---- %% 
 % Store raw data (metronome times, buzzer times, tapping times) and find
 % average deviation from steady metronome. Data will later be used to
 % determine the buzzer/tapping deviation from steady metronome
 
-plot_on = 1;    %produce plots from this section
+plot_on = 0;    %produce plots from this section
 
 for curr_subj = E.start_subj:E.total_subj
-    
-
-    curr = struct;
-    
+        
     % Rhythms tested for subject in the order they appear
     % Total number of trials for subject 
     % Files with fixed and unfixed corruptions
@@ -121,11 +118,14 @@ for curr_subj = E.start_subj:E.total_subj
         
         % Extract steady metronome times, buzzer times, and tapping times
         % Store in vectors of the same length
+        %fprintf('Subject: %d, Trial: %d', curr_subj, curr_trial);
         [ n_met, n_buzz, n_tap ] = extractLogData(E, log_file, freq_devs_by_trial, plot_on);
         n_met_all(1:length(n_met)) = n_met;  n_buzz_all(1:length(n_buzz)) = n_buzz; n_tap_all(1:length(n_tap)) = n_tap;
         
         % Calculate the average delay during a steady metronome 
         [ subject_data(curr_subj).avg_met_dev(curr_trial) ] = avgMetDev(E, n_buzz, n_tap, plot_on);
+        %fprintf('\t Average Metronome Response Delay: %.3f',subject_data(curr_subj).avg_met_dev(curr_trial));
+        %snapnow;
 
         rhythm_cond = rhythm_file(curr_trial) + 1;
         rhythm_reps(n_cond, curr_trial, rhythm_cond) = 1;
@@ -140,11 +140,18 @@ for curr_subj = E.start_subj:E.total_subj
         subject_data(curr_subj).rhythm_condition(rhythm_cond).trials_by_condition(n_cond).n_tap(:,rep) = n_tap_all;
         
     end
-    
-end
-%% 
 
-plot_on = 0;
+    close all;
+end
+% for curr_subj = E.start_subj:E.total_subj
+%     fprintf('Subj %d Average Metronome Response Delay: %.3f\n',curr_subj, mean(subject_data(curr_subj).avg_met_dev(:)));
+% end
+% snapnow;
+close all
+
+% ---- Name Section ---- %%   
+
+plot_on = 1;
 for curr_subj = E.start_subj:size(subject_data, 2)
     rhythm_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);
@@ -174,12 +181,16 @@ for curr_subj = E.start_subj:size(subject_data, 2)
                 n_buzz=(n_buzz(~isnan(n_buzz)));
                 n_tap=(n_tap(~isnan(n_tap)));
 
-
+               
                 [ buzz_dev, tap_dev, percent_taps ] = calcDeviation(n_met, n_buzz, n_tap, avg_met_dev, plot_on);
                 buzz_dev_all(1:length(n_met)) = buzz_dev; tap_dev_all(1:length(n_met)) = tap_dev;
                 subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).buzz_dev(:,rep) = buzz_dev_all;
                 subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).tap_dev(:,rep) = tap_dev_all;
-                
+                snapnow;
+                fprintf('Subject: %d, Rhythm Condition: %d, Trial: %d\n', curr_subj, rhCond, trCond);
+                fprintf('Frequency Deviations: %.2f, %.2f, %.2f', freq_devs_by_trial);
+
+                snapnow;
                 %statistic of tapping/buzzer percentage (raw data)
                 p_tb(1:2) = [perc_tapsvsbuzz  length(n_tap)/length(n_buzz)];
                 perc_tapsvsbuzz = nanmean(p_tb);
@@ -191,12 +202,21 @@ for curr_subj = E.start_subj:size(subject_data, 2)
             end
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).perc_tapsvsbuzz = perc_tapsvsbuzz;
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).perc_tapsthrown = perc_tapsthrown;
-
         end
     end
+    close all;
 end
+fprintf('Data: taps/buzzes (1st row), percent taps_used/total_taps (2nd row). Frequency Condition (columns)\n');
+for curr_subj = E.start_subj:E.total_subj
+    for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
+        fprintf('Subject: %d, Rhythm Condition: %d\n',curr_subj, rhCond);
+        display([subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsvsbuzz; subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsthrown]);
+    end
+end
+snapnow;
+return
 
-%%
+% ---- Name Section ---- %%  
 % Calculate nanmean per subject 
 for curr_subj = E.start_subj:size(subject_data, 2)
     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
@@ -222,7 +242,7 @@ for curr_subj = E.start_subj:size(subject_data, 2)
         end
     end
 end
-%%
+% ---- Name Section ---- %%  
 plot_on = 0;
 % Calculate FFT for individual subjects 
 for curr_subj = E.start_subj:size(subject_data, 2)
@@ -248,7 +268,7 @@ for curr_subj = E.start_subj:size(subject_data, 2)
         end
     end
 end
-%%
+% ---- Name Section ---- %%  
 % Rearrange data
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
@@ -269,7 +289,7 @@ for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
         end
     end
 end
-%%
+% ---- Name Section ---- %%  
 % Calculate bode plot values for each subject 
 freq_indx = [4 6 8 12 18 21 24];
 freq_indx3 = 21;
@@ -299,7 +319,7 @@ for rhCond = 1:size(rhythm_data, 2)
         end
     end
 end
-%%
+% ---- Name Section ---- %%  
 % Take average mag/angle for condition
 for rhCond = 1:size(rhythm_data, 2)
     for trCond = 1:size(rhythm_data(rhCond).freq_condition, 2) 
@@ -310,7 +330,7 @@ for rhCond = 1:size(rhythm_data, 2)
     end
 end
 
-%% 
+% ---- Name Section ---- %%  
 % Calculate bode plot values for each condition using avg of subjects
 figure;
 colors = ['r', 'b'];
@@ -363,7 +383,7 @@ axis([.05 .3 -200 50]);
 legend(h1, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
 legend(h2, 'No Rhythm', 'Rhythm', 'Location', 'southwest');
 
-%% for single subjects
+% ---- Name Section ---- %%  
 % no error included, no .25 magnitude
 figure;
 x.mag.rhy(6,:) = [];
