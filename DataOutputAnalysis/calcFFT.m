@@ -17,6 +17,7 @@ if plot_on
     plot(N, sum_buzz_dev, '*-b');
     hold on; 
     plot(N, sum_tap_dev, '-.r');
+    title('Deviation from the Metronome');
     xlabel('Count (tap)');
     ylabel('Deviation from the Metronome (s)');
     legend('Theoretical', 'Experimental');
@@ -44,9 +45,19 @@ if plot_on
     figure();
     plot(f, P1,'-*b'); hold on;
     plot(f, P3,'-.r');
+    title('Magnitude Plot ');
+    xlabel('Frequency (cycles/event)');
+    ylabel('Magnitude');
+    legend('Buzzer', 'Tapping');
+    
     figure();
     plot(f, A1,'-*b'); hold on;
     plot(f, A3,'-.r');
+    title('Phase Plot');
+    xlabel('Frequency (cycles/event');
+    ylabel('Phase');
+    legend('Buzzer', 'Tapping');
+
 end
 
 end

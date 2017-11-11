@@ -31,7 +31,7 @@ close all;
 % Edit as needed depending on experiment 
 % Variable E holds experimental variables/constants
 E = struct;                         
-E.start_subj = 1;
+E.start_subj = 16;
 E.total_subj = 16;                   % total number of subjects
 E.date = '9.1.2017';                % E.date for experiment (type of5experiment)
 E.trials_per_subj = 33;
@@ -147,11 +147,10 @@ end
 %     fprintf('Subj %d Average Metronome Response Delay: %.3f\n',curr_subj, mean(subject_data(curr_subj).avg_met_dev(:)));
 % end
 % snapnow;
-close all
 
 % ---- Name Section ---- %%   
 
-plot_on = 1;
+plot_on = 0;
 for curr_subj = E.start_subj:size(subject_data, 2)
     rhythm_file = dlmread(strcat(E.date, '/', E.date,'_Subject_',num2str(curr_subj),'_Rhythm.txt'));
     num_trials = length(rhythm_file);
@@ -169,7 +168,6 @@ for curr_subj = E.start_subj:size(subject_data, 2)
                 buzz_dev_all = nan(E.signal_len,1); tap_dev_all = nan(E.signal_len,1);
                 
                 % extract deviation freq being tested during trial
-                freq_devs_by_trial = nonzeros(freq_devs_by_subject(curr_trial,:));
                 avg_met_dev = mean(nonzeros(subject_data(curr_subj).avg_met_dev(:)));
 
                 n_met = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).n_met(:,rep);
@@ -186,11 +184,16 @@ for curr_subj = E.start_subj:size(subject_data, 2)
                 buzz_dev_all(1:length(n_met)) = buzz_dev; tap_dev_all(1:length(n_met)) = tap_dev;
                 subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).buzz_dev(:,rep) = buzz_dev_all;
                 subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).tap_dev(:,rep) = tap_dev_all;
-                snapnow;
-                fprintf('Subject: %d, Rhythm Condition: %d, Trial: %d\n', curr_subj, rhCond, trCond);
-                fprintf('Frequency Deviations: %.2f, %.2f, %.2f', freq_devs_by_trial);
-
-                snapnow;
+%                 snapnow;
+%                 fprintf('Subject: %d, Rhythm Condition: %d, Freq Condition: %d\n', curr_subj, rhCond, trCond);
+%                 if (rhCond ==3)
+%                     fprintf('Frequency Deviations: %.4f, %.4f, %.4f', nonzeros(E.condition_set(4, :)));
+% 
+%                 else
+%                     fprintf('Frequency Deviations: %.4f, %.4f, %.4f', nonzeros(E.condition_set(trCond, :)));
+%                 end
+% 
+%                 snapnow;
                 %statistic of tapping/buzzer percentage (raw data)
                 p_tb(1:2) = [perc_tapsvsbuzz  length(n_tap)/length(n_buzz)];
                 perc_tapsvsbuzz = nanmean(p_tb);
@@ -204,17 +207,16 @@ for curr_subj = E.start_subj:size(subject_data, 2)
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).perc_tapsthrown = perc_tapsthrown;
         end
     end
-    close all;
 end
-fprintf('Data: taps/buzzes (1st row), percent taps_used/total_taps (2nd row). Frequency Condition (columns)\n');
-for curr_subj = E.start_subj:E.total_subj
-    for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
-        fprintf('Subject: %d, Rhythm Condition: %d\n',curr_subj, rhCond);
-        display([subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsvsbuzz; subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsthrown]);
-    end
-end
-snapnow;
-return
+% fprintf('Data: taps/buzzes (1st row), percent taps_used/total_taps (2nd row). Frequency Condition (columns)\n\n');
+% for curr_subj = E.start_subj:E.total_subj
+%     for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
+%         fprintf('Subject: %d, Rhythm Condition: %d\n',curr_subj, rhCond);
+%         display([subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsvsbuzz; subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(:).perc_tapsthrown]);
+%     end
+% end
+% snapnow;
+
 
 % ---- Name Section ---- %%  
 % Calculate nanmean per subject 
@@ -250,14 +252,15 @@ for curr_subj = E.start_subj:size(subject_data, 2)
         for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
             buzz_dev = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).buzz_dev_avg;
             tap_dev = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).tap_dev_avg;
+%             fprintf('Subject: %d, Rhythm Condition: %d, Freq Condition: %d\n', curr_subj, rhCond, trCond);
+%             if (rhCond ==3)
+%                 fprintf('Frequency Deviations: %.4f, %.4f, %.4f', nonzeros(E.condition_set(4, :)));
+%             else
+%                 fprintf('Frequency Deviations: %.4f, %.4f, %.4f', nonzeros(E.condition_set(trCond, :)));
+%             end
+%             snapnow;
             [FFT_buzz, FFT_tap, mag_buzz, mag_tap, angle_buzz, angle_tap, f_axis] = calcFFT(E, buzz_dev, tap_dev, plot_on);
-            if plot_on
-                str = sprintf('FFT of Frequency Deviations: %.2f %.2f %.2f', freq_devs_by_trial);
-                title(str);
-                xlabel('Frequency (cycles per event)');
-                ylabel('DFT Values');
-                legend('Buzzer', 'Tapping');
-            end
+%             snapnow;
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).FFT_buzz = FFT_buzz;
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).FFT_tap = FFT_tap;
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz = mag_buzz;
@@ -267,15 +270,14 @@ for curr_subj = E.start_subj:size(subject_data, 2)
             subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).f_axis = f_axis;
         end
     end
+    close all;
 end
+
 % ---- Name Section ---- %%  
 % Rearrange data
 for rhCond = 1:size(subject_data(curr_subj).rhythm_condition, 2)
     for trCond = 1:size(subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition, 2)
         for curr_subj = E.start_subj:size(subject_data, 2)
-%             if curr_subj == 7 
-%                 continue;
-%             end
             mag_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_buzz;
             mag_tap_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).mag_tap;
             angle_buzz_by_subj = subject_data(curr_subj).rhythm_condition(rhCond).trials_by_condition(trCond).angle_buzz;
